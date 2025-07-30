@@ -19,3 +19,5 @@ validateRequest(updateRideStatusZodSchema),
 DriverControllers.changeRideStatus
 );
 router.get("/earnings", checkAuth(...Object.values(Role)),DriverControllers.viewEarnings);
+
+export const DriverRoutes = router;
