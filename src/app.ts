@@ -9,6 +9,7 @@ import notFound from "./app/middlewares/notFound";
 
 const app = express();
 
+
 app.use(
   expressSession({
     secret: envVars.EXPRESS_SESSION_SECRET,
