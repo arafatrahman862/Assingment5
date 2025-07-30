@@ -5,27 +5,31 @@ import httpStatus from "http-status-codes";
 import { Booking } from "./booking.model";
 
 
-export const createBooking = async (payload: Partial<IBooking>, userId: string) => {
-try {
-    const user = await User.findById(userId);
+ const createBookingService = async (bookingData: IBooking) => {
+   return await Booking.create(bookingData);
+ };
 
-      if (!user?.phone || !user.address) {
-        throw new AppError(
-          httpStatus.BAD_REQUEST,
-          "Please Update Your Profile to Book a Tour."
-        );
-      }
+const getRiderBookingsService = async (riderId: string) => {
+  return await Booking.find({ riderId }).sort({ createdAt: -1 });
+};
 
-        const booking = await Booking.create(
-          
-            {
-              user: userId,
-              status: BOOKING_STATUS.REQUESTED,
-              ...payload,
-            },
-        
-        );
-} catch (error) {
-    
-}
+const cancelBookingService = async (bookingId: string) => {
+  const booking = await Booking.findById(bookingId);
+  if (!booking) {
+    throw new AppError(httpStatus.NOT_FOUND, "Booking not found");
+  }
+  if (booking.status !== BOOKING_STATUS.REQUESTED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Cannot cancel after ride is accepted"
+    );
+  }
+  booking.status = BOOKING_STATUS.CANCELLED;
+  return await booking.save();
+};
+
+export const BookingServices = {
+  createBookingService,
+  getRiderBookingsService,
+  cancelBookingService,
 };

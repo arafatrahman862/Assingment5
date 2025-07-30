@@ -17,3 +17,4 @@ export const getDriverEarnings = async (driverId: string) => {
   const total = rides.reduce((sum, ride) => sum + (ride.fare || 0), 0);
   return { totalEarnings: total, rides };
 };
+ 
