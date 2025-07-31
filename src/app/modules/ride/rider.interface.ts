@@ -1,11 +1,13 @@
 import { Types } from "mongoose";
 import {  Role } from "../user/user.interface";
 
-export enum BOOKING_STATUS {
+export enum BOOKING_STATUS_RIDER {
   PENDING = "PENDING",
   CANCEL = "CANCEL",
   COMPLETE = "COMPLETE",
   FAILED = "FAILED",
+  REQUESTED = "REQUESTED",
+  CANCELLED = "CANCELLED"
 }
 
 export interface IRider {
@@ -16,6 +18,6 @@ export interface IRider {
   destination_location: string;
   rideHistory?: Types.ObjectId[];
   payment?: Types.ObjectId;
-  status: BOOKING_STATUS;
+  status: BOOKING_STATUS_RIDER;
   createdAt?: Date;
 }

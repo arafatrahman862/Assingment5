@@ -10,7 +10,7 @@ const driverSchema = new Schema<IDriver>(
           default: Role.DRIVER,
         },
     isBlocked: { type: Boolean, default: false },
-    approved: { type: Boolean, default: false },
+    isApproved: { type: Boolean, default: false },
     isOnline: { type: Boolean, default: false },
     totalEarnings: { type: Number, default: 0 },
     vehicleInfo: { type: String },

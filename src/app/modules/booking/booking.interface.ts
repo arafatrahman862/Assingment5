@@ -11,6 +11,7 @@ export enum BOOKING_STATUS {
 }
 
 export interface IBooking {
+  _id: Types.ObjectId;
   user: Types.ObjectId;
   pickup: string;
   destination_location: string;

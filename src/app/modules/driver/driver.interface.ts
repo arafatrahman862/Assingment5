@@ -13,7 +13,8 @@ export interface IDriver {
   isOnline?: boolean;
   isAvailable?: boolean;
   isBlocked?: boolean;
-  approved?: boolean;
+  isSuspended?: boolean;
+  isApproved?: boolean;
   totalEarnings?: number;
   vehicleInfo?: IVehicleInfo;
 }
