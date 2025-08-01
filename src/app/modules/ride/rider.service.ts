@@ -8,10 +8,9 @@ const createRideService = async (
   userId: string
 ) => {
   const ride = await Booking.create({
-    ...payload,
     user: userId,
-    riderId: userId,
     status: BOOKING_STATUS.REQUESTED,
+    ...payload,
   });
   return ride;
 };

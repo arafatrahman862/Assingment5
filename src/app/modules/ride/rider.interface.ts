@@ -11,7 +11,7 @@ export enum BOOKING_STATUS_RIDER {
 }
 
 export interface IRider {
-  user: Types.ObjectId;
+  user?: Types.ObjectId;
   role: Role.RIDER;
   bookings?: Types.ObjectId[];
   pickup: string;

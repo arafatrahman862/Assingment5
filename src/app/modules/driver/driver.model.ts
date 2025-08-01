@@ -4,11 +4,17 @@ import { Role } from "../user/user.interface";
 
 const driverSchema = new Schema<IDriver>(
   {
-      role: {
-          type: String,
-          enum: Object.values(Role),
-          default: Role.DRIVER,
-        },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: Object.values(Role),
+      default: Role.DRIVER,
+    },
+    email: { type: String },
     isBlocked: { type: Boolean, default: false },
     isApproved: { type: Boolean, default: false },
     isOnline: { type: Boolean, default: false },

@@ -8,45 +8,7 @@ import { createNewAccessTokenWithRefreshToken } from "../../utils/userTokens";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../../config/env";
 import { IAuthProvider, IsActive } from "../user/user.interface";
-// import { sendEmail } from "../../utils/sendEmail";
 
-// const credentialsLogin = async (payload: Partial<IUser>) => {
-//     const { email, password } = payload;
-
-//     const isUserExist = await User.findOne({ email })
-
-//     if (!isUserExist) {
-//         throw new AppError(httpStatus.BAD_REQUEST, "Email does not exist")
-//     }
-
-//     const isPasswordMatched = await bcryptjs.compare(password as string, isUserExist.password as string)
-
-//     if (!isPasswordMatched) {
-//         throw new AppError(httpStatus.BAD_REQUEST, "Incorrect Password")
-//     }
-//     // const jwtPayload = {
-//     //     userId: isUserExist._id,
-//     //     email: isUserExist.email,
-//     //     role: isUserExist.role
-//     // }
-//     // const accessToken = generateToken(jwtPayload, envVars.JWT_ACCESS_SECRET, envVars.JWT_ACCESS_EXPIRES)
-
-//     // const refreshToken = generateToken(jwtPayload, envVars.JWT_REFRESH_SECRET, envVars.JWT_REFRESH_EXPIRES)
-
-//     const userTokens = createUserTokens(isUserExist)
-
-//     // delete isUserExist.password;
-
-//     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//     const { password: pass, ...rest } = isUserExist.toObject()
-
-//     return {
-//         accessToken: userTokens.accessToken,
-//         refreshToken: userTokens.refreshToken,
-//         user: rest
-//     }
-
-// }
 const getNewAccessToken = async (refreshToken: string) => {
   const newAccessToken = await createNewAccessTokenWithRefreshToken(
     refreshToken
@@ -110,21 +72,7 @@ const forgotPassword = async (email: string) => {
     expiresIn: "10m",
   });
 
-  // const resetUILink = `${envVars.FRONTEND_URL}/reset-password?id=${isUserExist._id}&token=${resetToken}`;
-
-  // sendEmail({
-  //   to: isUserExist.email,
-  //   subject: "Password Reset",
-  //   templateName: "forgetPassword",
-  //   templateData: {
-  //     name: isUserExist.name,
-  //     resetUILink,
-  //   },
-  // });
-
-  /**
-   * http://localhost:5173/reset-password?id=687f310c724151eb2fcf0c41&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODdmMzEwYzcyNDE1MWViMmZjZjBjNDEiLCJlbWFpbCI6InNhbWluaXNyYXI2QGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzUzMTY2MTM3LCJleHAiOjE3NTMxNjY3Mzd9.LQgXBmyBpEPpAQyPjDNPL4m2xLF4XomfUPfoxeG0MKg
-   */
+  
 };
 const setPassword = async (userId: string, plainPassword: string) => {
   const user = await User.findById(userId);
@@ -184,7 +132,6 @@ const changePassword = async (
   user!.save();
 };
 
-//user - login - token (email, role, _id) - booking / payment / booking / payment cancel - token
 
 export const AuthServices = {
   // credentialsLogin,

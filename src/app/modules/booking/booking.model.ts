@@ -21,7 +21,7 @@ const bookingSchema = new Schema<IBooking>(
     destination_location: { type: String, required: true },
     pickup: { type: String, required: true },
     driverId: { type: String },
-    riderId: { type: String, required: true },
+    // riderId: { type: String },
     fare: { type: Number },
     rideHistory: { type: [String], default: [] },
   },

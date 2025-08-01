@@ -24,7 +24,7 @@ import { JwtPayload } from "jsonwebtoken";
 
  const getMyBookings = catchAsync(async (req: Request, res: Response) => {
   const bookings = await BookingServices.getRideHistoryService(
-    (req.user as any)._id.toString()
+    (req.user as any)?._id?.toString()
   );
   sendResponse(res, {
     success: true,

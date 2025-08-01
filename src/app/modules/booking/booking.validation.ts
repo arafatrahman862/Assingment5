@@ -5,7 +5,7 @@ export const createBookingZodSchema = z.object({
   destination_location: z.string({
     required_error: "Destination location is required",
   }),
-  riderId: z.string({ required_error: "Rider ID is required" }),
+ 
 });
 
 export const updateBookingZodSchema = z.object({

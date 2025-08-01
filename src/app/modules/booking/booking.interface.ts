@@ -20,6 +20,6 @@ export interface IBooking {
   status: BOOKING_STATUS;
   createdAt?: Date;
   fare?: number;
-   riderId: string;
+   riderId?: string;
   driverId?: string;
 }

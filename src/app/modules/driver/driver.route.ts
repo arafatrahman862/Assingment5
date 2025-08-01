@@ -30,15 +30,20 @@ router.patch(
   DriverControllers.updateDriverProfile,
   validateRequest(updateRideStatusZodSchema)
 );
-router.patch("/ride/:id/status", checkAuth(...Object.values(Role)),
+router.patch("/:id/status", checkAuth(...Object.values(Role)),
 validateRequest(updateRideStatusZodSchema),
 DriverControllers.changeRideStatus
 );
 router.patch(
   "/approve/:id",
-  checkAuth(Role.ADMIN || Role.SUPER_ADMIN),
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   DriverControllers.approveDriverController,
   validateRequest(updateRideStatusZodSchema)
+);
+router.patch(
+  "/promote-to-driver/:id",
+  checkAuth(Role.ADMIN|| Role.SUPER_ADMIN),
+  DriverControllers.promoteToDriverController
 );
 router.patch(
   "/suspend/:id",
@@ -48,7 +53,7 @@ router.patch(
 );
 router.patch(
   "/reject/:id",
-  checkAuth(Role.DRIVER),
+  checkAuth(...Object.values(Role)),
   DriverControllers.rejectDriverController,
   validateRequest(updateRideStatusZodSchema)
 );

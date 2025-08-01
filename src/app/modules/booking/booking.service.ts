@@ -1,5 +1,4 @@
 import AppError from "../../errorHelpers/AppError";
-import { User } from "../user/user.model";
 import { BOOKING_STATUS, IBooking } from "./booking.interface";
 import httpStatus from "http-status-codes";
 import { Booking } from "./booking.model";
@@ -7,7 +6,8 @@ import { Booking } from "./booking.model";
 
  const createBookingService = async (
    payload: Partial<IBooking>,
-   userId: string
+   userId: string,
+   
  ) => {
    if (!payload.pickup || !payload.destination_location) {
      throw new AppError(
@@ -35,9 +35,9 @@ import { Booking } from "./booking.model";
    }
 
    const booking = await Booking.create({
-     ...payload,
      user: userId,
      status: BOOKING_STATUS.REQUESTED,
+     ...payload,
    });
    return booking;
  };

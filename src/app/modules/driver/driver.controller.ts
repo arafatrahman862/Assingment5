@@ -6,19 +6,17 @@ import { catchAsync } from "../../utils/catchAsync";
 import { DriverService } from "./driver.service";
 
  const setAvailability = catchAsync(async (req: Request, res: Response) => {
-
-
   
     const isDriverOnline = await DriverService.toggleDriverAvailability(
-      (req.user as any)._id.toString(),
-      req.body.online
+      (req.user as any)!._id?.toString(),
+      req.body?.online
     );
      sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.ACCEPTED,
-        message: "Driver is Online",
-        data: isDriverOnline,
-    })
+       success: true,
+       statusCode: httpStatus.ACCEPTED,
+       message: `Driver is now ${isDriverOnline.isOnline ? "Online" : "Offline"}`,
+       data: isDriverOnline,
+     });
   
 })
 
@@ -50,7 +48,7 @@ const approveDriverController = catchAsync(
 
 const viewEarnings = catchAsync(async (req: Request, res: Response) => {
   const earnings = await DriverService.getDriverEarnings(
-    (req.user as any)._id.toString()
+    (req.user as any)?._id?.toString()
   );
   sendResponse(res, {
     success: true,
@@ -64,7 +62,7 @@ const acceptRideRequest = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
   const updatedBooking = await DriverService.acceptRideRequestService(
     payload,
-    (req.user as any)._id.toString()
+    (req.user as any)?._id?.toString()
   );
   sendResponse(res, {
     success: true,
@@ -78,7 +76,7 @@ const updateDriverProfile = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
   const updatedDriver = await DriverService.updateDriverProfileService(
     payload,
-    (req.user as any)._id.toString()
+    (req.user as any)?._id?.toString()
   );
   sendResponse(res, {
     success: true,
@@ -96,6 +94,19 @@ const suspendDriverController = catchAsync(
       statusCode: httpStatus.OK,
       success: true,
       message: "Driver suspended successfully",
+      data: result,
+    });
+  }
+);
+
+const promoteToDriverController = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.params.id;
+    const result = await DriverService.promoteToDriver(req.body,userId);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User promoted to driver successfully",
       data: result,
     });
   }
@@ -124,4 +135,5 @@ export const DriverControllers = {
   approveDriverController,
   suspendDriverController,
   rejectDriverController,
+  promoteToDriverController,
 };

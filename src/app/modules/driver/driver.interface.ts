@@ -9,6 +9,8 @@ export interface IVehicleInfo {
 }
 
 export interface IDriver {
+  user?: Types.ObjectId;
+  email?: string
   role: Role.DRIVER;
   isOnline?: boolean;
   isAvailable?: boolean;

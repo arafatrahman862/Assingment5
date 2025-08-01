@@ -1,22 +1,61 @@
 import AppError from "../../errorHelpers/AppError";
 import { BOOKING_STATUS, IBooking } from "../booking/booking.interface";
 import { Booking } from "../booking/booking.model";
-import { IUser } from "../user/user.interface";
+import { IUser, Role } from "../user/user.interface";
+import { User } from "../user/user.model";
+import { IDriver } from "./driver.interface";
 import { Driver } from "./driver.model";
 import httpStatus from "http-status-codes";
 
- const toggleDriverAvailability = async (
-  driverId: string,
-  online: boolean
-) => {
-  const driver = await Driver.findByIdAndUpdate(driverId,{online}, {new:true})
+const toggleDriverAvailability = async (userId: string, online: boolean) => {
 
- if (!driver){
-   throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
- }
- return driver;
+  let driver = await Driver.findOne({ user: userId });
 
 
+  if (!driver) {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new AppError(httpStatus.NOT_FOUND, "User not found");
+    }
+
+
+    driver = await Driver.create({
+      user: user._id,
+      email: user.email,
+      isApproved: false,
+      isSuspended: false,
+      online: online, 
+    });
+  } else {
+  
+    driver.isOnline = online;
+    await driver.save();
+  }
+
+
+  return driver;
+};
+
+ const promoteToDriver = async (payload: Partial<IDriver> ,userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  user.role = Role.DRIVER;
+  await user.save();
+
+  const existingDriver = await Driver.findOne({ user: userId });
+  if (!existingDriver) {
+    await Driver.create({
+      user: user._id,
+      email: user.email,
+      isApproved: false,
+      isSuspended: false,
+      online: false,
+      ...payload
+    });
+  }
+
+  return user;
 };
 
  const updateRideStatus = async (rideId: string, status: BOOKING_STATUS) => {
@@ -169,4 +208,5 @@ export const DriverService = {
   approveDriverService,
   suspendDriver,
   rejectDriver,
+  promoteToDriver,
 };

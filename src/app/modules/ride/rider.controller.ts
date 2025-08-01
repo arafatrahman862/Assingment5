@@ -3,13 +3,16 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status-codes";
 import { RiderServices } from "./rider.service";
+import { JwtPayload } from "jsonwebtoken";
 
 
  const createRide = catchAsync(
   async (req: Request, res: Response) => {
+     const decodeToken = req.user as JwtPayload;
     const result = await RiderServices.createRideService(
       req.body,
-      (req.user as any)._id.toString()
+      // (req.user as any)?._id?.toString()
+      decodeToken.userId
     );
     sendResponse(res, {
       statusCode: httpStatus.CREATED,
@@ -24,7 +27,7 @@ import { RiderServices } from "./rider.service";
   async (req: Request, res: Response) => {
     const result = await RiderServices.cancelRideService(
       req.params.id,
-      (req.user as any)._id.toString()
+      (req.user as any)?._id?.toString()
     );
     sendResponse(res, {
       statusCode: httpStatus.OK,
@@ -36,7 +39,7 @@ import { RiderServices } from "./rider.service";
 );
 
  const getRideHistory = catchAsync(async (req: Request, res: Response) => {
-  const result = await RiderServices.getRideHistoryService((req.user as any)._id.toString());
+  const result = await RiderServices.getRideHistoryService((req.user as any)?._id?.toString());
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
