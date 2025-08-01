@@ -29,5 +29,10 @@ router.patch(
   checkAuth(...Object.values(Role)),
   UserControllers.updateUser
 );
+router.patch(
+  "/verify/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  UserControllers.verifyUser
+);
 
 export const UserRoutes = router;

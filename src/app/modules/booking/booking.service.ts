@@ -51,6 +51,7 @@ const getRideHistoryService = async (userId: string) => {
 
 const cancelBookingService = async (rideId: string, userId: string) => {
   const ride = await Booking.findById(rideId);
+  console.log(ride)
   if (!ride) {
     throw new AppError(httpStatus.NOT_FOUND, "Booking not found");
   }

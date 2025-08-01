@@ -7,10 +7,16 @@ export interface IVehicleInfo {
   plateNumber: string;
   color?: string;
 }
+export enum DRIVER_STATUS {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  SUSPENDED = "SUSPENDED",
+  REJECTED = "REJECTED",
+}
 
 export interface IDriver {
   user?: Types.ObjectId;
-  email?: string
+  email?: string;
   role: Role.DRIVER;
   isOnline?: boolean;
   isAvailable?: boolean;
@@ -19,4 +25,6 @@ export interface IDriver {
   isApproved?: boolean;
   totalEarnings?: number;
   vehicleInfo?: IVehicleInfo;
+  // status?: string;
+  status: DRIVER_STATUS;
 }

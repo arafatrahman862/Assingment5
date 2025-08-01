@@ -8,6 +8,16 @@ const bookingSchema = new Schema<IBooking>(
       ref: "User",
       required: true,
     },
+    riderId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      
+    },
+    driverId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      
+    },
 
     payment: {
       type: Schema.Types.ObjectId,
@@ -20,7 +30,7 @@ const bookingSchema = new Schema<IBooking>(
     },
     destination_location: { type: String, required: true },
     pickup: { type: String, required: true },
-    driverId: { type: String },
+    // driverId: { type: String },
     // riderId: { type: String },
     fare: { type: Number },
     rideHistory: { type: [String], default: [] },

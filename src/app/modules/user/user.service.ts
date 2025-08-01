@@ -114,10 +114,25 @@ const getMe = async (userId: string) => {
   };
 };
 
+const verifyUserService = async (userId: string) => {
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { isVerified: true },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  return updatedUser;
+};
+
 export const UserServices = {
   createUser,
   getAllUsers,
   getSingleUser,
   updateUser,
   getMe,
+  verifyUserService,
 };

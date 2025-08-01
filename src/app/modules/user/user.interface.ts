@@ -43,4 +43,5 @@ export interface IUser {
   isAvailable?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  isOnline?: boolean;
 }

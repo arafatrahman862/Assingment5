@@ -24,12 +24,12 @@ router.get(
   checkAuth(...Object.values(Role)),
   DriverControllers.viewEarnings
 );
-router.patch(
-  "/update-profile",
-  checkAuth(...Object.values(Role)),
-  DriverControllers.updateDriverProfile,
-  validateRequest(updateRideStatusZodSchema)
-);
+// router.patch(
+//   "/update-profile",
+//   checkAuth(...Object.values(Role)),
+//   DriverControllers.updateDriverProfile,
+//   validateRequest(updateRideStatusZodSchema)
+// );
 router.patch("/:id/status", checkAuth(...Object.values(Role)),
 validateRequest(updateRideStatusZodSchema),
 DriverControllers.changeRideStatus
@@ -42,12 +42,12 @@ router.patch(
 );
 router.patch(
   "/promote-to-driver/:id",
-  checkAuth(Role.ADMIN|| Role.SUPER_ADMIN),
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   DriverControllers.promoteToDriverController
 );
 router.patch(
   "/suspend/:id",
-  checkAuth(Role.ADMIN || Role.SUPER_ADMIN),
+  checkAuth(Role.ADMIN , Role.SUPER_ADMIN),
   DriverControllers.suspendDriverController,
   validateRequest(updateRideStatusZodSchema)
 );

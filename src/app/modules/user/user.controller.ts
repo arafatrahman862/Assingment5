@@ -8,6 +8,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 
 
+
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = await UserServices.createUser(req.body);
@@ -82,6 +83,18 @@ const getSingleUser = catchAsync(
   }
 );
 
+const verifyUser = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.params.id;
+  const updatedUser = await UserServices.verifyUserService(userId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "User verified successfully",
+    data: updatedUser,
+  });
+});
+
 
 export const UserControllers = {
   createUser,
@@ -89,5 +102,6 @@ export const UserControllers = {
   getSingleUser,
   updateUser,
   getMe,
+  verifyUser,
 };
 
