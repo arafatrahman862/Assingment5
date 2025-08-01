@@ -17,9 +17,9 @@ export interface IBooking {
   destination_location: string;
   rideHistory?: Types.ObjectId[];
   payment?: Types.ObjectId;
-  status: BOOKING_STATUS;
+  status?: BOOKING_STATUS;
   createdAt?: Date;
   fare?: number;
-   riderId?: string;
-  driverId?: string;
+  riderId?: Types.ObjectId;
+  driverId?: Types.ObjectId;
 }
