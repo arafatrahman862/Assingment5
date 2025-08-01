@@ -3,12 +3,13 @@ import { UserRoutes } from "../modules/user/user.route";
 import { AuthRoutes } from "../modules/auth/auth.route";
 import { DriverRoutes } from "../modules/driver/driver.route";
 import { BookingRoutes } from "../modules/booking/booking.route";
+import { RiderRoutes } from "../modules/ride/rider.route";
 
 export const router = Router();
 
 const moduleRoutes = [
   {
-    path: "/user",
+    path: "/users",
     route: UserRoutes,
   },
   
@@ -16,12 +17,12 @@ const moduleRoutes = [
     path: "/auth",
     route: AuthRoutes,
   },
-//   {
-//     path: "/rider",
-//     route: RiderRoutes,
-//   },
   {
-    path: "/driver",
+    path: "/rides",
+    route: RiderRoutes,
+  },
+  {
+    path: "/drivers",
     route: DriverRoutes,
   },
   {

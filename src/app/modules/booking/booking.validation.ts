@@ -1,12 +1,15 @@
 import { z } from "zod";
-import { BOOKING_STATUS } from "./booking.interface";
 
 export const createBookingZodSchema = z.object({
-  destination_location: z.string(),
-  pickup: z.string(),
+  pickup: z.string({ required_error: "Pickup location is required" }),
+  destination_location: z.string({
+    required_error: "Destination location is required",
+  }),
  
 });
 
-export const updateBookingStatusZodSchema = z.object({
-  status: z.enum(Object.values(BOOKING_STATUS) as [string]),
+export const updateBookingZodSchema = z.object({
+  status: z.enum(["CANCELLED"], {
+    required_error: "Only cancellation is allowed through this endpoint.",
+  }),
 });

@@ -9,11 +9,14 @@ export interface IVehicleInfo {
 }
 
 export interface IDriver {
+  user?: Types.ObjectId;
+  email?: string
   role: Role.DRIVER;
   isOnline?: boolean;
   isAvailable?: boolean;
   isBlocked?: boolean;
-  approved?: boolean;
+  isSuspended?: boolean;
+  isApproved?: boolean;
   totalEarnings?: number;
   vehicleInfo?: IVehicleInfo;
 }

@@ -14,10 +14,49 @@ router.patch(
  checkAuth(...Object.values(Role)),
  DriverControllers.setAvailability
 );
-router.patch("/ride/:id/status", checkAuth(...Object.values(Role)),
+router.post(
+  "/accept-ride",
+  checkAuth(...Object.values(Role)),
+  DriverControllers.acceptRideRequest
+);
+router.get(
+  "/earnings",
+  checkAuth(...Object.values(Role)),
+  DriverControllers.viewEarnings
+);
+router.patch(
+  "/update-profile",
+  checkAuth(...Object.values(Role)),
+  DriverControllers.updateDriverProfile,
+  validateRequest(updateRideStatusZodSchema)
+);
+router.patch("/:id/status", checkAuth(...Object.values(Role)),
 validateRequest(updateRideStatusZodSchema),
 DriverControllers.changeRideStatus
 );
-router.get("/earnings", checkAuth(...Object.values(Role)),DriverControllers.viewEarnings);
+router.patch(
+  "/approve/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  DriverControllers.approveDriverController,
+  validateRequest(updateRideStatusZodSchema)
+);
+router.patch(
+  "/promote-to-driver/:id",
+  checkAuth(Role.ADMIN|| Role.SUPER_ADMIN),
+  DriverControllers.promoteToDriverController
+);
+router.patch(
+  "/suspend/:id",
+  checkAuth(Role.ADMIN || Role.SUPER_ADMIN),
+  DriverControllers.suspendDriverController,
+  validateRequest(updateRideStatusZodSchema)
+);
+router.patch(
+  "/reject/:id",
+  checkAuth(...Object.values(Role)),
+  DriverControllers.rejectDriverController,
+  validateRequest(updateRideStatusZodSchema)
+);
+
 
 export const DriverRoutes = router;

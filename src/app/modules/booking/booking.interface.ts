@@ -11,6 +11,7 @@ export enum BOOKING_STATUS {
 }
 
 export interface IBooking {
+  _id: Types.ObjectId;
   user: Types.ObjectId;
   pickup: string;
   destination_location: string;
@@ -19,6 +20,6 @@ export interface IBooking {
   status: BOOKING_STATUS;
   createdAt?: Date;
   fare?: number;
-   riderId: string;
+   riderId?: string;
   driverId?: string;
 }
