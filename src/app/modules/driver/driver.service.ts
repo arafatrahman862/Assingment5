@@ -1,14 +1,14 @@
 import AppError from "../../errorHelpers/AppError";
-import { BOOKING_STATUS, IBooking } from "../booking/booking.interface";
+import { BOOKING_STATUS } from "../booking/booking.interface";
 import { Booking } from "../booking/booking.model";
-import { IUser, Role } from "../user/user.interface";
+import {  Role } from "../user/user.interface";
 import { User } from "../user/user.model";
 import { DRIVER_STATUS, IDriver } from "./driver.interface";
 import { Driver } from "./driver.model";
 import httpStatus from "http-status-codes";
 
 const toggleDriverAvailability = async (userId: string, online: boolean) => {
-  let driver = await Driver.findOne({ user: userId });
+  const driver = await Driver.findOne({ user: userId });
   console.log("Driver",driver)
 
   if (!driver) {

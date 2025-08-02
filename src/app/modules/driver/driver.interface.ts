@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { IUser, Role } from "../user/user.interface";
+import {  Role } from "../user/user.interface";
 
 export interface IVehicleInfo {
   type: string;
