@@ -1,5 +1,4 @@
 import { Types } from "mongoose";
-import {  Role } from "../user/user.interface";
 
 export enum BOOKING_STATUS {
   REQUESTED = "REQUESTED",
