@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import httpStatus from "http-status-codes";
 
@@ -10,6 +11,7 @@ import AppError from "../../errorHelpers/AppError";
 
 const setAvailability = catchAsync(async (req: Request, res: Response) => {
   const isDriverOnline = await DriverService.toggleDriverAvailability(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any
     (req.user as any)!.userId?.toString(),
     req.body?.isOnline
   );
