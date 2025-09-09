@@ -31,7 +31,7 @@ router.patch(
 );
 router.patch(
   "/verify/:id",
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  // checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   UserControllers.verifyUser
 );
 
