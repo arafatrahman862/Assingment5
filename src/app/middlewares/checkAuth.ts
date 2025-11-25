@@ -3,15 +3,15 @@ import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
-import { IsActive } from "../modules/user/user.interface";
 import { User } from "../modules/user/user.model";
 import { verifyToken } from "../utils/jwt";
+import { IsBlocked } from "../modules/user/user.interface";
 
 export const checkAuth =
   (...authRoles: string[]) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const accessToken = req.headers.authorization;
+      const accessToken = req.headers.authorization || req.cookies.accessToken;
 
       if (!accessToken) {
         throw new AppError(403, "No Token Received");
@@ -30,15 +30,12 @@ export const checkAuth =
       if (!isUserExist.isVerified) {
         throw new AppError(httpStatus.BAD_REQUEST, "User is not verified");
       }
-      if (
-        isUserExist.isActive === IsActive.BLOCKED ||
-        isUserExist.isActive === IsActive.INACTIVE
-      ) {
-        throw new AppError(
-          httpStatus.BAD_REQUEST,
-          `User is ${isUserExist.isActive}`
-        );
-      }
+    if (isUserExist.isBlocked === IsBlocked.BLOCKED) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        `User Is ${isUserExist.isBlocked}`
+      );
+    }
       if (isUserExist.isDeleted) {
         throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
       }

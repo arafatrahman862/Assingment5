@@ -7,7 +7,7 @@ import {
   VerifyCallback,
 } from "passport-google-oauth20";
 import { Strategy as LocalStrategy } from "passport-local";
-import { IsActive, Role } from "../modules/user/user.interface";
+import {  IsBlocked, Role } from "../modules/user/user.interface";
 import { User } from "../modules/user/user.model";
 import { envVars } from "./env";
 
@@ -31,11 +31,10 @@ passport.use(
         }
 
         if (
-          isUserExist.isActive === IsActive.BLOCKED ||
-          isUserExist.isActive === IsActive.INACTIVE
+          isUserExist.isBlocked === IsBlocked.BLOCKED 
         ) {
         
-          return done(`User is ${isUserExist.isActive}`);
+          return done(`User is ${isUserExist.isBlocked}`);
         }
         if (isUserExist.isDeleted) {
        
@@ -99,11 +98,10 @@ passport.use(
 
         if (
           isUserExist &&
-          (isUserExist.isActive === IsActive.BLOCKED ||
-            isUserExist.isActive === IsActive.INACTIVE)
+          ((isUserExist.isBlocked === IsBlocked.BLOCKED)) 
         ) {
        
-          done(`User is ${isUserExist.isActive}`);
+          done(`User is ${isUserExist.isBlocked}`);
         }
 
         if (isUserExist && isUserExist.isDeleted) {

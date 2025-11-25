@@ -1,33 +1,76 @@
-import { model, Schema } from "mongoose";
-import { DRIVER_STATUS, IDriver } from "./driver.interface";
-import { Role } from "../user/user.interface";
+import { Schema, model } from "mongoose";
+import {
+  DriverOnlineStatus,
+  DriverRidingStatus,
+  DriverStatus,
+  IDriver,
+  VehicleType,
+} from "./driver.interface";
 
 const driverSchema = new Schema<IDriver>(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    role: {
-      type: String,
-      enum: Object.values(Role),
-      default: Role.DRIVER,
+    vehicle: {
+      vehicleNumber: { type: String, required: true },
+      vehicleType: {
+        type: String,
+        enum: Object.values(VehicleType),
+        required: true,
+      },
     },
-    status: {
+    onlineStatus: {
       type: String,
-      enum: Object.values(DRIVER_STATUS),
-      default: DRIVER_STATUS.PENDING,
+      enum: Object.values(DriverOnlineStatus),
+      default: DriverOnlineStatus.OFFLINE,
     },
-    email: { type: String },
-    isBlocked: { type: Boolean, default: false },
-    isApproved: { type: Boolean, default: false },
-    isOnline: { type: Boolean, default: false },
-    totalEarnings: { type: Number, default: 0 },
-    vehicleInfo: { type: String },
-    // status: { type: String },
+    ridingStatus: {
+      type: String,
+      enum: Object.values(DriverRidingStatus),
+      default: DriverRidingStatus.IDLE,
+    },
+    currentLocation: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+        required: false,
+      },
+      coordinates: {
+        type: [Number],
+        required: false,
+      },
+    },
+    totalEarning: {
+      type: Number,
+      default: 0,
+    },
+    totalRides: {
+      type: Number,
+      default: 0,
+    },
+    rejectedRides: {
+      type: Number,
+      default: 0,
+    },
+    drivingLicense: {
+      type: String,
+      required: true,
+    },
+    driverStatus: {
+      type: String,
+      enum: Object.values(DriverStatus),
+      default: DriverStatus.PENDING,
+    },
+    rating: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  {
+    versionKey: false,
+    timestamps: true,
+  }
 );
 
 export const Driver = model<IDriver>("Driver", driverSchema);

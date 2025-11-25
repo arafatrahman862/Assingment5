@@ -7,6 +7,7 @@ import { QueryBuilder } from "../../utils/QueryBuilder";
 import { IAuthProvider, IUser, Role } from "./user.interface";
 import { User } from "./user.model";
 import { userSearchableFields } from "./user.constant";
+import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
@@ -44,7 +45,7 @@ const updateUser = async (
 ) => {
   if (decodedToken.role === Role.RIDER || decodedToken.role === Role.DRIVER) {
     if (userId !== decodedToken.userId) {
-      throw new AppError(401, "You are not authorized");
+      throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
     }
   }
 
@@ -54,25 +55,23 @@ const updateUser = async (
     throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
   }
 
-  if (
-    decodedToken.role === Role.ADMIN &&
-    ifUserExist.role === Role.SUPER_ADMIN
-  ) {
-    throw new AppError(401, "You are not authorized");
-  }
-
-
   if (payload.role) {
     if (decodedToken.role === Role.RIDER || decodedToken.role === Role.DRIVER) {
       throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
     }
   }
 
-  if (payload.isActive || payload.isDeleted || payload.isVerified) {
+  if (payload.isBlocked || payload.isDeleted || payload.isVerified) {
     if (decodedToken.role === Role.RIDER || decodedToken.role === Role.DRIVER) {
       throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
     }
   }
+
+   if (payload.picture) {
+     if (ifUserExist.picture) {
+       await deleteImageFromCloudinary(ifUserExist.picture);
+     }
+   }
 
   const newUpdatedUser = await User.findByIdAndUpdate(userId, payload, {
     new: true,
@@ -89,6 +88,7 @@ const getAllUsers = async (query: Record<string, string>) => {
     .search(userSearchableFields)
     .sort()
     .fields()
+    .dateSearch()
     .paginate();
 
   const [data, meta] = await Promise.all([
@@ -114,16 +114,35 @@ const getMe = async (userId: string) => {
   };
 };
 
-const verifyUserService = async (userId: string) => {
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    { isVerified: true },
-    { new: true, runValidators: true }
-  );
+const updateUserStatus = async (
+  userId: string,
+  payload: Partial<IUser>,
+  decodedToken: JwtPayload
+) => {
+  const ifUserExist = await User.findById(userId);
 
-  if (!updatedUser) {
+  if (!ifUserExist) {
     throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }
+
+  if (decodedToken.userId.toString() === ifUserExist._id.toString()) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You cannot change your own block status"
+    );
+  }
+
+  if (payload.isBlocked === ifUserExist.isBlocked) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `User is already ${payload.isBlocked ? "blocked" : "unblocked"}`
+    );
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(userId, payload, {
+    new: true,
+    runValidators: true,
+  });
 
   return updatedUser;
 };
@@ -134,5 +153,5 @@ export const UserServices = {
   getSingleUser,
   updateUser,
   getMe,
-  verifyUserService,
+  updateUserStatus,
 };

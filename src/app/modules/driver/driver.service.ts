@@ -1,233 +1,223 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AppError from "../../errorHelpers/AppError";
-import { BOOKING_STATUS } from "../booking/booking.interface";
-import { Booking } from "../booking/booking.model";
-import {  Role } from "../user/user.interface";
-import { User } from "../user/user.model";
-import { DRIVER_STATUS, IDriver } from "./driver.interface";
+import { DriverStatus, ICurrentLocation, IDriver } from "./driver.interface";
 import { Driver } from "./driver.model";
 import httpStatus from "http-status-codes";
+import { User } from "../user/user.model";
+import { IsBlocked, Role } from "../user/user.interface";
+import { driverSearchableFields } from "./driver.contants";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 
-const toggleDriverAvailability = async (userId: string, online: boolean) => {
-  const driver = await Driver.findOne({ user: userId });
-  console.log("Driver",driver)
-
-  if (!driver) {
-    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
+const createDriver = async (payload: IDriver) => {
+  const user = await User.findById(payload.userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found!");
   }
 
-  driver.isOnline = online;
-  const savedDriver = await driver.save();
-
-  console.log("Updated driver:", savedDriver);
-
-  return driver;
-};
-
- const promoteToDriver = async (payload: Partial<IDriver> ,userId: string) => {
-  const user = await User.findById(userId);
-  if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found");
-  user.role = Role.DRIVER;
-  await user.save();
-
-  const existingDriver = await Driver.findOne({ user: userId });
-  if (!existingDriver) {
-    await Driver.create({
-      user: user._id,
-      email: user.email,
-      isApproved: false,
-      isSuspended: false,
-      isOnline: false,
-      status: DRIVER_STATUS.PENDING,
-      ...payload
-    });
-  }
-
-  return user;
-};
-
-// transaction Rollback
- const updateRideStatus = async (riderId: string, status: BOOKING_STATUS) => {
-const existingRide = await Booking.findById(riderId);
-
-// console.log(existingRide)
-// console.log(rideId);
-if (!existingRide) {
-  throw new AppError(httpStatus.NOT_FOUND, "Ride not found");
-}
-
-if (
-  existingRide.status === BOOKING_STATUS.CANCELLED ||
-  existingRide.status === BOOKING_STATUS.COMPLETED
-) {
-  throw new AppError(
-    httpStatus.BAD_REQUEST,
-    "Ride is already completed or cancelled"
-  );
-}
-
-const updatedRide = await Booking.findByIdAndUpdate(
-  riderId,
-  { status },
-  { new: true, runValidators: true }
-);
-
-return updatedRide;
- };
-
-const getDriverEarnings = async (driverId: string) => {
-  const rides = await Booking.find({
-    driverId,
-    status: BOOKING_STATUS.COMPLETED,
-  });
-  const total = rides.reduce((sum, ride) => sum + (ride.fare || 0), 0);
-  return { totalEarnings: total, rides };
-};
- 
-
-const acceptRideRequestService = async (
-  payload : any,
-  userId:any
-) => {
-  // console.log(userId)
-  const booking = await Booking.findById(payload.bookingId);
-
-    if (!payload.bookingId) {
-      throw new AppError(httpStatus.BAD_REQUEST, "Booking ID is required");
-    }
-
-  if (!booking) {
-    throw new AppError(httpStatus.NOT_FOUND, "Booking not found");
-  }
-
-  if (booking.status !== BOOKING_STATUS.REQUESTED) {
+  if (user.isBlocked === IsBlocked.BLOCKED) {
     throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Ride is not available for acceptance"
+      httpStatus.FORBIDDEN,
+      "Your account is blocked. Contact support."
+    );
+  }
+  if (!user.isVerified) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "Your account is Not Verified. Contact support."
     );
   }
 
-   const driver = await Driver.findOne({ user: userId });
+  const existingDriver = await Driver.findOne({ userId: payload.userId });
 
-  //  console.log(driver)
-   if (!driver) {
-    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
-   }
-   if (!driver.isOnline)
-     throw new AppError(
-       httpStatus.FORBIDDEN,
-       "Driver must be online to accept rides"
-     );
-
-   const ongoingRide = await Booking.findOne({
-     driverId: userId,
-     status: {
-       $in: [
-         BOOKING_STATUS.ACCEPTED,
-         BOOKING_STATUS.PICK_UP,
-         BOOKING_STATUS.IN_TRANSIT,
-       ],
-     },
-   });
-   if (ongoingRide)
-     throw new AppError(httpStatus.CONFLICT, "You are already on a ride");
-
-
-  booking.driverId = userId;
-  booking.status = BOOKING_STATUS.ACCEPTED;
-
-  const updatedBooking = await booking.save();
-  return updatedBooking;
-};
-//  const rejectDriver = async (driverId: string) => {
-//    const driver = await Driver.findById(driverId);
-//    if (!driver) {
-//      throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
-//    }
-//    driver.isApproved = false;
-//    driver.isSuspended = true;
-//    await driver.save();
-//    return driver;
-//  };
-const rejectDriver = async (userId: string) => {
-  const driver = await Driver.findOne({ user: userId },);
-  console.log(driver)
-
-  if (!driver) {
-    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
+  if (existingDriver) {
+    if (existingDriver.driverStatus === DriverStatus.PENDING) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        "You Are Already Registered! Please wait for admin approval!"
+      );
+    }
+    if (existingDriver.driverStatus === DriverStatus.SUSPENDED) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        "You are suspended. Please contact the office!"
+      );
+    }
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Driver profile already exists."
+    );
   }
 
-  if (driver.isSuspended && driver.isApproved === false) {
-    throw new AppError(httpStatus.CONFLICT, "Driver is already rejected");
-  }
-
-  driver.isApproved = false;
-  driver.isSuspended = true;
-  driver.status = DRIVER_STATUS.REJECTED;
-
-  const updatedDriver = await driver.save();
-  return updatedDriver;
-};
-const approveDriverService = async (driverId: string) => {
-  const driver = await Driver.findById(driverId);
-  console.log(driver)
-
-  if (!driver) {
-    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
-  }
-
-  if (driver.isApproved) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Driver is already approved");
-  }
-
-  driver.isApproved = true;
-  driver.status = DRIVER_STATUS.APPROVED;
-  await driver.save();
-
+  const driver = await Driver.create(payload);
   return driver;
 };
 
-// const updateDriverProfileService = async (
-//   // payload: Partial<IUser>,
-//   driverId: string,
-//   payload: any,
-  
-// ) => {
-//   console.log(driverId);
-//   const updatedDriver = await Driver.findByIdAndUpdate(driverId, payload, {
-//     new: true,
-//     runValidators: true,
-//   });
+export const updateDriverStatus = async (
+  id: string,
+  driverStatus: DriverStatus
+) => {
+  const session = await Driver.startSession();
+  session.startTransaction();
 
-//   if (!updatedDriver) {
-//     throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
-//   }
-
-//   return updatedDriver;
-// };
-
-const suspendDriver = async (driverId: string) => {
-  const driver = await Driver.findById(driverId);
+  try {
+    const driver = await Driver.findById(id).session(session);
     if (!driver) {
       throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
     }
-  driver.isSuspended = true;
-  await driver.save();
-  return driver;
+
+    if (
+      driver.driverStatus === DriverStatus.APPROVED &&
+      driverStatus === DriverStatus.APPROVED
+    ) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Driver is already approved");
+    }
+
+    driver.driverStatus = driverStatus;
+    await driver.save({ session });
+
+    if (driverStatus === DriverStatus.APPROVED) {
+      await User.findByIdAndUpdate(
+        driver.userId,
+        { role: Role.DRIVER },
+        { session }
+      );
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return driver;
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 };
 
+const getMe = async (userId: string) => {
+  const driver = await Driver.findOne({ userId });
+  return {
+    data: driver,
+  };
+};
 
+const updateMyDriverProfile = async (userId: string, updatedData: any) => {
+  const driver = await Driver.findOne({ userId });
+  if (!driver) throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
 
+  const updatedDriver = await Driver.findOneAndUpdate(
+    { userId },
+    { $set: updatedData },
+    { new: true }
+  );
 
+  return updatedDriver;
+};
 
-export const DriverService = {
-  toggleDriverAvailability,
-  updateRideStatus,
-  getDriverEarnings,
-  acceptRideRequestService,
-  // updateDriverProfileService,
-  approveDriverService,
-  suspendDriver,
-  rejectDriver,
-  promoteToDriver,
+const getAllDrivers = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(
+    Driver.find().populate("userId"),
+    query
+  );
+
+  const driverData = queryBuilder
+    .filter()
+    .search(driverSearchableFields)
+    .sort()
+    .fields()
+    .dateSearch()
+    .paginate();
+
+  const [data, meta] = await Promise.all([
+    driverData.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return {
+    data,
+    meta,
+  };
+};
+
+const getSingleDriver = async (id: string) => {
+  const driver = await Driver.findById(id).populate({
+    path: "userId",
+    select: "-password -auths",
+  });
+
+  if (!driver) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
+  }
+
+  return {
+    data: driver,
+  };
+};
+
+const goOnline = async (userId: string, currentLocation: ICurrentLocation) => {
+  const driverInfo = await Driver.findOne({ userId });
+  if (!driverInfo) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
+  }
+
+  const driver = await Driver.findOneAndUpdate(
+    { userId },
+    {
+      onlineStatus: "ONLINE",
+      currentLocation: currentLocation,
+    },
+    { new: true }
+  );
+  return { data: driver };
+};
+const updateLocation = async (
+  userId: string,
+  currentLocation: ICurrentLocation
+) => {
+  const driverInfo = await Driver.findOne({ userId });
+  if (!driverInfo) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
+  }
+
+  const driver = await Driver.findOneAndUpdate(
+    { userId },
+    {
+      onlineStatus: "ONLINE",
+      currentLocation: currentLocation,
+    },
+    { new: true }
+  );
+  return { data: driver };
+};
+
+const goOffline = async (userId: string) => {
+  const driverInfo = await Driver.findOne({ userId });
+  if (!driverInfo) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver not found");
+  }
+
+  const driver = await Driver.findOneAndUpdate(
+    { userId },
+    {
+      onlineStatus: "OFFLINE",
+      currentLocation: {
+        type: "Point",
+        coordinates: [],
+      },
+    },
+    { new: true }
+  );
+  return { data: driver };
+};
+
+export const DriverServices = {
+  createDriver,
+  updateDriverStatus,
+  getMe,
+  updateMyDriverProfile,
+  getAllDrivers,
+  getSingleDriver,
+  goOffline,
+  goOnline,
+  updateLocation,
 };

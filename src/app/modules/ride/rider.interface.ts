@@ -1,23 +1,48 @@
 import { Types } from "mongoose";
-import {  Role } from "../user/user.interface";
 
-export enum BOOKING_STATUS_RIDER {
-  PENDING = "PENDING",
-  CANCEL = "CANCEL",
-  COMPLETE = "COMPLETE",
-  FAILED = "FAILED",
-  REQUESTED = "REQUESTED",
-  CANCELLED = "CANCELLED"
+
+export interface ILocation {
+  type: "Point";
+  coordinates: [number, number];
 }
 
-export interface IRider {
-  user?: Types.ObjectId;
-  role: Role.RIDER;
-  bookings?: Types.ObjectId[];
-  pickup: string;
-  destination_location: string;
-  rideHistory?: Types.ObjectId[];
+export enum RideStatus {
+  REQUESTED = "REQUESTED",
+  ACCEPTED = "ACCEPTED",
+  PICKED_UP = "PICKED_UP",
+  IN_TRANSIT = "IN_TRANSIT",
+  ARRIVED = "ARRIVED",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum CancelledBy {
+  RIDER = "RIDER",
+  DRIVER = "DRIVER",
+}
+
+export interface IRide {
+  riderId: Types.ObjectId;
+  driverId?: Types.ObjectId;
+  pickupLocation: ILocation;
+  currentLocation: ILocation;
+  transactionId?: string;
+  destination: ILocation;
+  travelDistance?: number;
+  fare?: number;
   payment?: Types.ObjectId;
-  status: BOOKING_STATUS_RIDER;
-  createdAt?: Date;
+  rideStatus: RideStatus;
+  cancelledBy?: CancelledBy;
+  timestamps: {
+    requestedAt: Date;
+    acceptedAt?: Date;
+    pickedUpAt?: Date;
+    startedAt?: Date;
+    arrivedAt?: Date;
+    completedAt?: Date;
+    cancelledAt?: Date;
+  };
+  rejectedBy: Types.ObjectId[];
+  feedback?: string;
+  rating?: number;
 }

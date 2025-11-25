@@ -1,53 +1,95 @@
-import { model, Schema, Types } from "mongoose";
-import { BOOKING_STATUS_RIDER, IRider } from "./rider.interface";
-import { Role } from "../user/user.interface";
+import { Schema, model } from "mongoose";
+import { CancelledBy, IRide, RideStatus } from "./rider.interface";
 
-
-const riderSchema = new Schema<IRider>(
+const rideSchema = new Schema<IRide>(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+    riderId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    driverId: { type: Schema.Types.ObjectId, ref: "Driver" },
+    pickupLocation: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number, Number],
+        required: true,
+      },
+    },
+    destination: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number, Number],
+        required: true,
+      },
+    },
+    transactionId: {
+      type: String,
+    },
+    currentLocation: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number, Number],
+        required: true,
+      },
+    },
+    travelDistance: {
+      type: Number,
+    },
+    fare: {
+      type: Number,
+    },
+    rideStatus: {
+      type: String,
+      enum: Object.values(RideStatus),
+      default: RideStatus.REQUESTED,
     },
     payment: {
       type: Schema.Types.ObjectId,
       ref: "Payment",
     },
-    status: {
-      type: String,
-      enum: Object.values(BOOKING_STATUS_RIDER),
-      default: BOOKING_STATUS_RIDER.REQUESTED,
+    timestamps: {
+      requestedAt: {
+        type: Date,
+        default: Date.now,
+      },
+      acceptedAt: Date,
+      pickedUpAt: Date,
+      startedAt: Date,
+      arrivedAtAt: Date,
+      completedAt: Date,
+      cancelledAt: Date,
     },
-    bookings: [
+    cancelledBy: {
+      type: String,
+      enum: Object.values(CancelledBy),
+    },
+    rejectedBy: [
       {
-        type: Types.ObjectId,
-        ref: "Booking",
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        default: [],
       },
     ],
-    rideHistory: [
-      {
-        type: Types.ObjectId,
-        ref: "Booking",
-      },
-    ],
-    destination_location: {
+    feedback: {
       type: String,
-      required: true,
     },
-    pickup: {
-      type: String,
-      required: true,
-    },
-    role: {
-      type: String,
-      enum: Object.values(Role),
-      default: Role.RIDER,
-    },
+    rating: { type: Number },
   },
   {
+    versionKey: false,
     timestamps: true,
   }
 );
 
-export const Rider = model<IRider>("Rider", riderSchema);
+rideSchema.index({ "pickupLocation.coordinates": "2dsphere" });
+
+export const Ride = model<IRide>("Ride", rideSchema);

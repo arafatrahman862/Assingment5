@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Your Question Has Been Answered</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 550px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #111;
+        }
+
+        .message {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .question-box,
+        .answer-box {
+            background: #f4f4f4;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .question-title,
+        .answer-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #000;
+        }
+
+        .footer {
+            font-size: 13px;
+            color: #777;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        a.button {
+            background-color: #000000;
+            color: #ffffff !important;
+            padding: 12px 24px;
+            font-size: 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="title">Hello <%= name %>,</div>
+
+        <div class="message">
+            Your question has been answered by our support team. Please find the details below:
+        </div>
+
+        <div class="question-box">
+            <div class="question-title">Your Question:</div>
+            <div class="question-content">
+                <%= question %>
+            </div>
+        </div>
+
+        <div class="answer-box">
+            <div class="answer-title">Answer:</div>
+            <div class="answer-content">
+                <%= answer %>
+            </div>
+        </div>
+
+        <div class="message">
+            If you have further questions, feel free to reply to this email or visit our FAQ section.
+        </div>
+
+        <div class="footer">© Cario-Ride — Keeping you moving.</div>
+    </div>
+</body>
+
+</html>
