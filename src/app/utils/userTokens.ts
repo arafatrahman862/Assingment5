@@ -2,7 +2,7 @@ import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
-import { IsActive, IUser } from "../modules/user/user.interface";
+import {  IsBlocked, IUser } from "../modules/user/user.interface";
 import { User } from "../modules/user/user.model";
 import { generateToken, verifyToken } from "./jwt";
 
@@ -43,15 +43,12 @@ export const createNewAccessTokenWithRefreshToken = async (
   if (!isUserExist) {
     throw new AppError(httpStatus.BAD_REQUEST, "User does not exist");
   }
-  if (
-    isUserExist.isActive === IsActive.BLOCKED ||
-    isUserExist.isActive === IsActive.INACTIVE
-  ) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      `User is ${isUserExist.isActive}`
-    );
-  }
+    if (isUserExist.isBlocked === IsBlocked.BLOCKED) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        `User Is ${isUserExist.isBlocked}`
+      );
+    }
   if (isUserExist.isDeleted) {
     throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
   }

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Ride Invoice</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .invoice-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+
+        .invoice-details,
+        .invoice-address {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .invoice-details th,
+        .invoice-details td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .invoice-details th {
+            background-color: #f5f5f5;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .total {
+            text-align: right;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #777;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="invoice-container">
+        <h1>Invoice for Ride</h1>
+
+        <div class="invoice-address">
+            <p><strong>Rider:</strong>
+                <%= userName %>
+            </p>
+            <p><strong>Ride Date:</strong>
+                <%= rideDate.toLocaleString() %>
+            </p>
+            <p><strong>Transaction ID:</strong>
+                <%= transactionId %>
+            </p>
+        </div>
+
+        <div class="section-title">Ride Details</div>
+        <table class="invoice-details">
+            <tr>
+                <th>Pickup Location</th>
+                <td>
+                    <%= pickupLocation || 'N/A' %>
+                </td>
+            </tr>
+            <tr>
+                <th>Destination Location</th>
+                <td>
+                    <%= destinationLocation || 'N/A' %>
+                </td>
+            </tr>
+            <tr>
+                <th>Travel Distance</th>
+                <td>
+                    <%= travelDistance %> km
+                </td>
+            </tr>
+            <tr>
+                <th>Completed At</th>
+                <td>
+                    <%= completedAt.toLocaleString() %>
+                </td>
+            </tr>
+        </table>
+
+        <div class="total">Total Amount: $<%= totalFare %>
+        </div>
+
+        <div class="footer">
+            Thank you for riding with us!<br>
+            Powered by Cario-Ride
+        </div>
+    </div>
+</body>
+
+</html>

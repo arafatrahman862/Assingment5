@@ -9,6 +9,7 @@ import { handlerDuplicateError } from "../helpers/handleDuplicateError";
 import { handlerZodError } from "../helpers/handlerZodError";
 import { handlerValidationError } from "../helpers/handlerValidationError";
 import AppError from "../errorHelpers/AppError";
+import { deleteImageFromCloudinary } from "../config/cloudinary.config";
 
 
 
@@ -21,6 +22,10 @@ export const globalErrorHandler = async (
   if (envVars.NODE_ENV === "development") {
     console.log(err);
   }
+
+    if (req.file) {
+      await deleteImageFromCloudinary(req.file.path);
+    }
 
   let errorSources: TErrorSources[] = [];
   let statusCode = 500;

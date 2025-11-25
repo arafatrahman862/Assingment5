@@ -7,7 +7,9 @@ import bcryptjs from "bcryptjs";
 import { createNewAccessTokenWithRefreshToken } from "../../utils/userTokens";
 import  { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../../config/env";
-import { IAuthProvider } from "../user/user.interface";
+import { IAuthProvider, IsBlocked } from "../user/user.interface";
+import jwt from "jsonwebtoken";
+import { sendEmail } from "../../utils/sendEmail";
 
 const getNewAccessToken = async (refreshToken: string) => {
   const newAccessToken = await createNewAccessTokenWithRefreshToken(
@@ -40,40 +42,48 @@ const resetPassword = async (
 
   await isUserExist.save();
 };
-// const forgotPassword = async (email: string) => {
-//   const isUserExist = await User.findOne({ email });
+const forgotPassword = async (email: string) => {
+  const isUserExist = await User.findOne({ email });
 
-//   if (!isUserExist) {
-//     throw new AppError(httpStatus.BAD_REQUEST, "User does not exist");
-//   }
-//   if (!isUserExist.isVerified) {
-//     throw new AppError(httpStatus.BAD_REQUEST, "User is not verified");
-//   }
-//   if (
-//     isUserExist.isActive === IsActive.BLOCKED ||
-//     isUserExist.isActive === IsActive.INACTIVE
-//   ) {
-//     throw new AppError(
-//       httpStatus.BAD_REQUEST,
-//       `User is ${isUserExist.isActive}`
-//     );
-//   }
-//   if (isUserExist.isDeleted) {
-//     throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
-//   }
+  if (!isUserExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User does not exist");
+  }
+  if (!isUserExist.isVerified) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User is not verified");
+  }
+  if (isUserExist.isBlocked === IsBlocked.BLOCKED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `User is ${isUserExist.isBlocked}`
+    );
+  }
+  if (isUserExist.isDeleted) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
+  }
 
-//   const jwtPayload = {
-//     userId: isUserExist._id,
-//     email: isUserExist.email,
-//     role: isUserExist.role,
-//   };
+  const jwtPayload = {
+    userId: isUserExist._id,
+    email: isUserExist.email,
+    role: isUserExist.role,
+  };
 
-//   const resetToken = jwt.sign(jwtPayload, envVars.JWT_ACCESS_SECRET, {
-//     expiresIn: "10m",
-//   });
+  const resetToken = jwt.sign(jwtPayload, envVars.JWT_ACCESS_SECRET, {
+    expiresIn: "10m",
+  });
 
+     const resetUILink = `${envVars.FRONTEND_URL}/reset-password?id=${isUserExist._id}&token=${resetToken}`;
+
+     await sendEmail({
+       to: isUserExist.email,
+       subject: "Password Reset",
+       templateName: "forgetPassword",
+       templateData: {
+         name: isUserExist.name,
+         resetUILink,
+       },
+     });
   
-// };
+};
 const setPassword = async (userId: string, plainPassword: string) => {
   const user = await User.findById(userId);
 
@@ -134,10 +144,9 @@ const changePassword = async (
 
 
 export const AuthServices = {
-  // credentialsLogin,
   getNewAccessToken,
   changePassword,
   setPassword,
-  // forgotPassword,
+  forgotPassword,
   resetPassword,
 };

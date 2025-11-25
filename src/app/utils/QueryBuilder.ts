@@ -34,6 +34,24 @@ export class QueryBuilder<T> {
     return this;
   }
 
+  dateSearch(dateField = "createdAt"): this {
+    const dateSearch = this.query.dateSearch?.trim();
+    if (dateSearch) {
+      const regex = new RegExp(dateSearch, "i");
+      this.modelQuery = this.modelQuery.find({
+        $expr: {
+          $regexMatch: {
+            input: {
+              $dateToString: { format: "%Y-%m-%d", date: `$${dateField}` },
+            },
+            regex: regex,
+          },
+        },
+      });
+    }
+    return this;
+  }
+
   sort(): this {
     const sort = this.query.sort || "-createdAt";
 
@@ -66,7 +84,7 @@ export class QueryBuilder<T> {
     const totalDocuments = await this.modelQuery.model.countDocuments();
 
     const page = Number(this.query.page) || 1;
-    const limit = Number(this.query.limit) || 10;
+    const limit = Number(this.query.limit) || 30;
 
     const totalPage = Math.ceil(totalDocuments / limit);
 

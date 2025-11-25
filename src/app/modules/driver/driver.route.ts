@@ -1,62 +1,62 @@
-import { checkAuth } from "../../middlewares/checkAuth";
-import { validateRequest } from "../../middlewares/validateRequest";
-import { Role } from "../user/user.interface";
-import { DriverControllers } from "./driver.controller";
 import { Router } from "express";
-import { updateRideStatusZodSchema } from "./driver.validation";
+import { checkAuth } from "../../middlewares/checkAuth";
+import { Role } from "../user/user.interface";
+import { validateRequest } from "../../middlewares/validateRequest";
 
+import { multerUpload } from "../../config/multer.config";
+import { createDriverZodSchema, goOnlineZodSchema, updateDriverStatusZodSchema } from "./driver.validation";
+import { DriverControllers } from "./driver.controller";
 
 const router = Router();
 
-
 router.patch(
-  "/availability",
- checkAuth(...Object.values(Role)),
- DriverControllers.setAvailability
+  "/driver-location-update",
+  checkAuth(Role.DRIVER),
+  DriverControllers.updateLocation
 );
+
 router.post(
-  "/accept-ride",
+  "/register",
   checkAuth(...Object.values(Role)),
-  DriverControllers.acceptRideRequest
+  multerUpload.single("file"),
+  validateRequest(createDriverZodSchema),
+  DriverControllers.createDriver
 );
-router.get(
-  "/earnings",
-  checkAuth(...Object.values(Role)),
-  DriverControllers.viewEarnings
-);
-// router.patch(
-//   "/update-profile",
-//   checkAuth(...Object.values(Role)),
-//   DriverControllers.updateDriverProfile,
-//   validateRequest(updateRideStatusZodSchema)
-// );
-router.patch("/:id/status", checkAuth(...Object.values(Role)),
-validateRequest(updateRideStatusZodSchema),
-DriverControllers.changeRideStatus
-);
+router.get("/me", checkAuth(Role.DRIVER), DriverControllers.getMe);
+
 router.patch(
-  "/approve/:id",
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-  DriverControllers.approveDriverController,
-  validateRequest(updateRideStatusZodSchema)
-);
-router.patch(
-  "/promote-to-driver/:id",
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-  DriverControllers.promoteToDriverController
-);
-router.patch(
-  "/suspend/:id",
-  checkAuth(Role.ADMIN , Role.SUPER_ADMIN),
-  DriverControllers.suspendDriverController,
-  validateRequest(updateRideStatusZodSchema)
-);
-router.patch(
-  "/reject/:id",
-  checkAuth(...Object.values(Role)),
-  DriverControllers.rejectDriverController,
-  validateRequest(updateRideStatusZodSchema)
+  "/update-my-driver-profile",
+  checkAuth(Role.DRIVER),
+  multerUpload.single("file"),
+  DriverControllers.updateMyDriverProfile
 );
 
+router.patch(
+  "/go-online",
+  checkAuth(Role.DRIVER),
+  validateRequest(goOnlineZodSchema),
+  DriverControllers.goOnline
+);
+
+router.patch(
+  "/go-offline",
+  checkAuth(Role.DRIVER),
+  DriverControllers.goOffline
+);
+
+router.patch(
+  "/status/:id",
+  checkAuth(Role.ADMIN),
+  validateRequest(updateDriverStatusZodSchema),
+  DriverControllers.updateDriverStatus
+);
+
+router.get(
+  "/all-drivers",
+  checkAuth(Role.ADMIN),
+  DriverControllers.getAllDrivers
+);
+
+router.get("/:id", checkAuth(Role.ADMIN), DriverControllers.getSingleDriver);
 
 export const DriverRoutes = router;

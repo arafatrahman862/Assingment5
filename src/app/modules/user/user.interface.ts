@@ -1,7 +1,6 @@
 import { Types } from "mongoose";
 
 export enum Role {
-  SUPER_ADMIN = "SUPER_ADMIN",
   ADMIN = "ADMIN",
   RIDER = "RIDER",
   DRIVER = "DRIVER",
@@ -13,10 +12,17 @@ export interface IAuthProvider {
   providerId: string;
 }
 
-export enum IsActive {
-  ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
+export enum IsBlocked {
+  UNBLOCKED = "UNBLOCKED",
   BLOCKED = "BLOCKED",
+}
+
+export enum RiderStatus {
+  IDLE = "IDLE",
+  REQUESTED = "REQUESTED",
+  WAITING = "WAITING",
+  PICKED_UP = "PICKED_UP",
+  ON_RIDE = "ON_RIDE",
 }
 
 export interface IUser {
@@ -26,20 +32,16 @@ export interface IUser {
   password?: string;
   phone?: string;
   picture?: string;
-  address?: string;
+  location?: {
+    type: "Point";
+    coordinates: [number, number];
+  };
   isDeleted?: string;
-  isActive?: IsActive;
+  isBlocked?: IsBlocked;
   isVerified?: boolean;
   role: Role;
   auths: IAuthProvider[];
-  bookings?: Types.ObjectId[];
-  earnings?: number;
-  approved?: boolean;
-  vehicleInfo?: {
-    model: string;
-    plateNumber: string;
-    color?: string;
-  };
+  riderStatus: RiderStatus;
   isAvailable?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

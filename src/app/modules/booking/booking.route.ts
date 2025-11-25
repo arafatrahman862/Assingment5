@@ -11,15 +11,15 @@ const router = express.Router();
 router.post(
   "/request",
   checkAuth(...Object.values(Role)),
+  validateRequest(createBookingZodSchema),
   BookingController.createBooking,
-  validateRequest(createBookingZodSchema)
 );
 router.get("/me", checkAuth(...Object.values(Role)), BookingController.getMyBookings);
 router.patch(
   "/:id/status",
   checkAuth(...Object.values(Role)),
+  validateRequest(updateBookingZodSchema),
   BookingController.cancelBooking,
-  validateRequest(updateBookingZodSchema)
 );
 
 export const BookingRoutes =  router;

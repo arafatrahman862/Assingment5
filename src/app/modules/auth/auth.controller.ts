@@ -75,13 +75,13 @@ const logout = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     res.clearCookie("accessToken", {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
     });
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
     });
 
     sendResponse(res, {
@@ -121,7 +121,7 @@ const resetPassword = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "Password Changed Successfully",
+      message: "Password reset Successfully",
       data: null,
     });
   }
@@ -136,28 +136,28 @@ const setPassword = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "Password Changed Successfully",
+      message: "Password set Successfully",
       data: null,
     });
   }
 );
-// const forgotPassword = catchAsync(
-//   async (req: Request, res: Response, next: NextFunction) => {
-//     const { email } = req.body;
+const forgotPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { email } = req.body;
 
-//     await AuthServices.forgotPassword(email);
+    await AuthServices.forgotPassword(email);
 
-//     sendResponse(res, {
-//       success: true,
-//       statusCode: httpStatus.OK,
-//       message: "Email Sent Successfully",
-//       data: null,
-//     });
-//   }
-// );
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Email Sent Successfully",
+      data: null,
+    });
+  }
+);
 const googleCallbackController = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    let redirectTo = req.query.state ? (req.query.state as string) : "";
+    let redirectTo = req.query.state ? req.query.state as string : "";
 
     if (redirectTo.startsWith("/")) {
       redirectTo = redirectTo.slice(1);
@@ -169,6 +169,10 @@ const googleCallbackController = catchAsync(
       throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
     }
 
+     const tokenInfo = createUserTokens(user);
+
+     setAuthCookie(res, tokenInfo);
+
     res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`);
   }
 );
@@ -179,7 +183,7 @@ export const AuthControllers = {
   logout,
   resetPassword,
   setPassword,
-  // forgotPassword,
+  forgotPassword,
   changePassword,
   googleCallbackController,
 };
